@@ -1,8 +1,17 @@
-def setup_routes(app):
-    @app.route('/')
-    def home():
-        return "Hello, Doqia!"
+from app import app
+from flask import jsonify, request
+from app.models import User, db
 
-    @app.route('/another-route')
-    def another_route():
-        return "This is another route"
+@app.route('/users', methods=['POST'])
+def create_user():
+    data = request.json
+    new_user = User(username=data['username'], email=data['email'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': 'User created successfully'})
+
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    result = [{'id': user.id, 'username': user.username, 'email': user.email} for user in users]
+    return jsonify(result)
